@@ -26,8 +26,9 @@ func SetupRoutes(router *gin.Engine) {
 	router.GET("/referred-users/:userId", controllers.GetReferredUsers)
 	router.POST("/claim-daily-bonus/:userId", controllers.ClaimDailyBonus)
 
-	// Game routes
+	// BBible Verse routes
 	router.GET("/daily-verse", controllers.GetDailyBibleVerse)
+	// router.GET("/random-verse", controllers.BibleVerseDemo)
 
 	// Leaderboard routes
 	router.GET("/leaderboard", controllers.GetLeaderboard)
