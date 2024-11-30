@@ -1,8 +1,8 @@
 package controllers
 
 import (
-	"bossblock/db"
-	"bossblock/model"
+	"christville/db"
+	"christville/model"
 	"context"
 	"log"
 	"net/http"
@@ -54,6 +54,7 @@ func GetOrCreateUser(c *gin.Context) {
 			LastLogin:      time.Now(),
 			CreatedAt:      time.Now(),
 			UpdatedAt:      time.Now(),
+			BonusClaimedAt:	time.Date(1970, 1, 1, 0, 0, 0, 0, time.UTC),
 		}
 
 		referralKey, err := generateUniqueReferralKey(usersCollection)
@@ -277,12 +278,11 @@ func getPaginationInfo(page, pageSize, totalCount int) gin.H {
 }
 
 func ClaimDailyBonus(c *gin.Context) {
-
     client := db.GetClient()
     database := client.Database("Christville")
 
     userID := c.Param("userId")
-    log.Println("User ID:", userID)  // Debugging step
+    log.Println("User ID:", userID)
 
     // Convert user ID to ObjectID
     objectID, err := primitive.ObjectIDFromHex(userID)
@@ -290,51 +290,53 @@ func ClaimDailyBonus(c *gin.Context) {
         c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
         return
     }
-    log.Println("Object ID:", objectID.Hex())  // Debugging step
 
     // Fetch user from database
     var user model.User
     err = database.Collection("users").FindOne(context.Background(), bson.M{"_id": objectID}).Decode(&user)
     if err != nil {
-        log.Printf("Failed to fetch user with ID %s: %v", objectID.Hex(), err)  // Debugging step
         c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
         return
     }
 
-    now := time.Now()
-    today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+    // Define the current time and today's date at midnight, in UTC
+    now := time.Now().UTC() // Ensure current time is UTC
+    today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC) // Set today to midnight in UTC
 
-    // Check if daily bonus has already been claimed today
-    if !user.LastLogin.Before(today) {
+    log.Printf("BonusClaimedAt: %v, Today: %v", user.BonusClaimedAt, today)
+
+    // Check if the bonus has already been claimed today
+    if user.BonusClaimedAt.UTC().Year() == today.Year() && user.BonusClaimedAt.UTC().YearDay() == today.YearDay() {
         c.JSON(http.StatusBadRequest, gin.H{"error": "Daily bonus already claimed today"})
         return
     }
 
-    // Set daily bonus amount (you can adjust this as needed)
-    bonusTokens := 100 // Example: give 100 tokens as a daily bonus
+    // Set daily bonus amount
+    bonusTokens := 100
 
-    // Update user data with new token count and last login date
-    userUpdate := bson.M{
-        "$inc": bson.M{
-            "token_count": bonusTokens,
-        },
+    // Update the database with the new bonus claim time and increment tokens
+    update := bson.M{
         "$set": bson.M{
-            "last_login": today,
+            "bonus_claimed_at": now, // Update bonus claim timestamp
+        },
+        "$inc": bson.M{
+            "token_count": bonusTokens, // Increment token count by bonus amount
         },
     }
 
-    _, err = database.Collection("users").UpdateOne(context.Background(), bson.M{"_id": objectID}, userUpdate)
+    _, err = database.Collection("users").UpdateOne(context.Background(), bson.M{"_id": objectID}, update)
     if err != nil {
+        log.Printf("Failed to update user: %v", err)
         c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user"})
         return
     }
 
+    // Respond with success
     c.JSON(http.StatusOK, gin.H{
-        "message":    "Daily bonus claimed successfully",
+        "message":     "Daily bonus claimed successfully",
         "bonusTokens": bonusTokens,
     })
 }
-
 
 
 func GetLeaderboard(c *gin.Context) {

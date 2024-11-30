@@ -3,7 +3,7 @@ package routes
 import (
 	"time"
 
-	"bossblock/controllers"
+	"christville/controllers"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -26,7 +26,7 @@ func SetupRoutes(router *gin.Engine) {
 	router.GET("/referred-users/:userId", controllers.GetReferredUsers)
 	router.POST("/claim-daily-bonus/:userId", controllers.ClaimDailyBonus)
 
-	// BBible Verse routes
+	// Bible Verse routes
 	router.GET("/daily-verse", controllers.GetDailyBibleVerse)
 	// router.GET("/random-verse", controllers.BibleVerseDemo)
 
@@ -39,8 +39,10 @@ func SetupRoutes(router *gin.Engine) {
 	router.GET("/prayer/user/:userId", controllers.GetUserPrayers)
 	
 	// Quiz Routes
-	router.POST("/quiz", controllers.CreateQuiz)
+	router.POST("/upload-quiz", controllers.CreateQuiz)
 	router.GET("/quiz", controllers.GetDailyQuiz)	
 	router.POST("/submit-quiz", controllers.SubmitQuiz)
+	
+	// Referral Routes
 	
 }
