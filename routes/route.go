@@ -43,6 +43,10 @@ func SetupRoutes(router *gin.Engine) {
 	router.GET("/quiz", controllers.GetDailyQuiz)	
 	router.POST("/submit-quiz", controllers.SubmitQuiz)
 	
-	// Referral Routes
+	// Task Routes
+	router.POST("/task/twitter/:userId", controllers.ClaimTwitterBonus)
+	router.POST("/task/tg/:userId", controllers.ClaimTgBonus)
+	router.POST("/task/invite-3/:userId", controllers.Invite3Bonus)
+	router.POST("/task/invite-7/:userId", controllers.Invite7Bonus)
 	
 }
