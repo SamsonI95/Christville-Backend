@@ -16,7 +16,7 @@ var mongoOnce sync.Once
 func ConnectMongoDB() (*mongo.Client, error) {
 	mongoOnce.Do(func() {
 		// Set client options
-		clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
+		clientOptions := options.Client().ApplyURI("mongodb://mongodb:27017")
 
 		// Connect to MongoDB
 		client, err := mongo.Connect(context.TODO(), clientOptions)
