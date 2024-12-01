@@ -46,4 +46,4 @@ jobs:
             --name christ-container \
             -e DATABASE_NAME=Christville \
             -e MONGODB_URI=mongodb+srv://jefferyokesamuel1:YShPTjt5BETnP770@christville.rss18.mongodb.net/?retryWrites=true&w=majority \
-            jefferyokesamuel/christville:latest
+            jefferyokesamuel/christville
