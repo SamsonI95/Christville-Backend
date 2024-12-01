@@ -25,13 +25,21 @@ jobs:
       - name: Push image to docker hub
         run: docker push jefferyokesamuel/christville:latest
 
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Pull docker image
-        run: docker pull jefferyokesamuel/christville:latest
-      - name: Delete old container
-        run: docker rm -f christ-container || true # Prevent failure if the container doesn't exist
-      - name: Run docker container
-        run: docker run -d -p 8080:8080 --name christ-container jefferyokesamuel/christville
+ deploy:
+  needs: build
+  runs-on: self-hosted
+  steps:
+    - name: Pull docker image
+      run: docker pull jefferyokesamuel/christville:latest
+
+    - name: Delete old container
+      run: docker rm -f christ-container || true # Prevent failure if the container doesn't exist
+
+    - name: Run docker container
+      run: |
+        docker run -d \
+          -p 8080:8080 \
+          --name christ-container \
+          -e DATABASE_NAME=Christville \
+          -e MONGODB_URI=mongodb+srv://jefferyokesamuel1:YShPTjt5BETnP770@christville.rss18.mongodb.net/?retryWrites=true&w=majority \
+          jefferyokesamuel/christville
