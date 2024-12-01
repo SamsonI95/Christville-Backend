@@ -11,7 +11,7 @@ jobs:
     steps:
       - name: Checkout Source
         uses: actions/checkout@v4
-      - name: Create .env
+      - name: Create .env file
         run: |
           echo "DATABASE_NAME=${{secrets.DATABASE_NAME}}" >> .env
           echo "MONGODB_URI=${{secrets.MONGODB_URI}}" >> .env
@@ -24,7 +24,6 @@ jobs:
 
       - name: Push image to docker hub
         run: docker push jefferyokesamuel/christville:latest
-
 deploy:
   needs: build
   runs-on: self-hosted
