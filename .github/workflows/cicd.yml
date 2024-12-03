@@ -1,8 +1,8 @@
 name: Deploy Go Application
 
-on: 
+on:
   push:
-    branches: 
+    branches:
       - deploy-to-ec2
 
 jobs:
@@ -20,68 +20,41 @@ jobs:
       - name: Login to Docker Hub
         run: docker login -u ${{secrets.DOCKER_USERNAME}} -p ${{secrets.DOCKER_PASSWORD}}
 
-      - name: Build Go app Docker image
+      - name: Build Docker Image
         run: docker build -t jefferyokesamuel/christville .
 
-      - name: Push Go app image to Docker Hub
+      - name: Push Image to Docker Hub
         run: docker push jefferyokesamuel/christville:latest
 
   deploy:
     needs: build
     runs-on: self-hosted
     steps:
-      - name: Pull Go app Docker image
+      - name: Install Docker Compose
+        run: |
+          sudo curl -L "https://github.com/docker/compose/releases/download/v2.20.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+          docker-compose --version
+
+      - name: Pull Docker Image
         run: docker pull jefferyokesamuel/christville:latest
 
-      - name: List local Docker images
+      - name: List Local Docker Images
         run: docker images
 
-      - name: Verify Go app image exists
-        run: docker images | grep "jefferyokesamuel/christville"
-
-      - name: Set up Docker Compose
+      - name: Create Docker Compose File
         run: |
-          cat <<EOF > docker-compose.yml
-          version: "3.9"
+          echo "version: '3.8'
           services:
             app:
               image: jefferyokesamuel/christville:latest
               container_name: christ-container
+              restart: always
+              ports:
+                - '8080:8080'
               environment:
-                DATABASE_NAME: Christville
-              ports:
-                - "8080:8080"
-              depends_on:
-                - nginx
-
-            nginx:
-              image: nginx:latest
-              container_name: nginx-container
-              volumes:
-                - ./nginx.conf:/etc/nginx/nginx.conf:ro
-              ports:
-                - "80:80"
-              depends_on:
-                - app
-          EOF
-
-      - name: Set up NGINX configuration
-        run: |
-          cat <<EOF > nginx.conf
-          events {}
-          http {
-              server {
-                  listen 80;
-
-                  location / {
-                      proxy_pass http://app:8080;
-                      proxy_set_header Host \$host;
-                      proxy_set_header X-Real-IP \$remote_addr;
-                      proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-                  }
-              }
-          }
-          EOF
+                DATABASE_NAME: ${{secrets.DATABASE_NAME}}
+                MONGODB_URI: ${{secrets.MONGODB_URI}}" > docker-compose.yml
 
       - name: Deploy with Docker Compose
         run: |
