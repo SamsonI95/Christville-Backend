@@ -42,7 +42,7 @@ jobs:
       - name: List Local Docker Images
         run: docker images
 
-      - name: Create Docker Compose File
+      - name: Create Docker Compose 
         run: |
           echo "version: '3.8'
           services:
