@@ -36,7 +36,7 @@ jobs:
           sudo chmod +x /usr/local/bin/docker-compose
           docker-compose --version
 
-      - name: Pull Docker Image
+      - name: Pull Docker Images
         run: docker pull jefferyokesamuel/christville:latest
 
       - name: List Local Docker Images
