@@ -36,7 +36,7 @@ func main() {
     }()
 
     // Define allowed hosts
-    allowedHosts := []string{"localhost:8080", "vivablockchainconsulting.xyz", "3.83.246.115", "172.31.95.36"}
+    allowedHosts := []string{"localhost:8080", "vivablockchainconsulting.xyz", "3.83.246.115", "3.83.246.115:8080", "172.31.95.36"}
 
     // Initialize Gin router
     router := gin.Default()
