@@ -5,6 +5,8 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/hex"
+	"fmt"
+
 	//"strings"
 	"time"
 
@@ -44,6 +46,9 @@ func GenerateUniqueHash() string {
 
 func CreateUser(user *User) error {
 	collection := db.GetClient().Database("Christville").Collection("users")
+	if collection == nil {
+        return fmt.Errorf("MongoDB collection is nil")
+    }
 	user.CreatedAt = time.Now()
 	user.UpdatedAt = time.Now()
 	_, err := collection.InsertOne(context.Background(), user)
